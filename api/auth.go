@@ -7,6 +7,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dush-t/epirisk/db"
+	"github.com/dush-t/epirisk/db/query"
 	"github.com/dush-t/epirisk/util"
 )
 
@@ -30,7 +31,7 @@ func SignInHandler(c db.Conn) http.Handler {
 			return
 		}
 
-		user, err := db.GetUser(c, data.PhoneNo)
+		user, err := query.GetUser(c, data.PhoneNo)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -70,7 +71,7 @@ func SignUpHandler(c db.Conn) http.Handler {
 			return
 		}
 
-		user, err := db.AddUser(c, data.PhoneNo, data.Password, data.Name)
+		user, err := query.AddUser(c, data.PhoneNo, data.Password, data.Name)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println("Error creating user:", err)
