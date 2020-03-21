@@ -9,10 +9,12 @@ import (
 
 // User represents the User entity stored in the database
 type User struct {
-	PhoneNo  string
-	Password string
-	Name     string
-	Risk     float64
+	PhoneNo           string
+	Password          string
+	Name              string
+	Risk              float64
+	SuspectsInfection bool
+	Infected          bool
 }
 
 type claims struct {
@@ -46,6 +48,7 @@ func GetUserFromNode(n neo4j.Node) User {
 		Password: u["Password"].(string),
 		Name:     u["Name"].(string),
 		Risk:     u["Risk"].(float64),
+		Infected: u["Infected"].(bool),
 	}
 
 	return user

@@ -23,7 +23,16 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 
 	user, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
-			"CREATE (user:User) SET user.PhoneNo = $phoneNo SET user.Password = $password SET user.Name = $name SET user.Risk=0.0 RETURN user",
+			`
+			CREATE (user:User) 
+				SET user.PhoneNo = $phoneNo 
+				SET user.Password = $password 
+				SET user.Name = $name 
+				SET user.Risk = 0.0 
+				SET user.Infected = false
+				SET user.SuspectsInfection = false
+			RETURN user
+			`,
 			db.QueryContext{
 				"phoneNo":  phoneNo,
 				"password": passwordHash,
