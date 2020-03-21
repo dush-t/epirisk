@@ -11,10 +11,6 @@ import (
 	"github.com/dush-t/epirisk/util"
 )
 
-// ContextKey because Go throws a warning if I use a string directly
-// to access a value by in request context. Sorry being lazy.
-type ContextKey string
-
 // MetUserHandler is the handler called at /met_user
 func MetUserHandler(c db.Conn) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

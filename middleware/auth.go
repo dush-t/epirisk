@@ -11,10 +11,6 @@ import (
 	"github.com/dush-t/epirisk/db/query"
 )
 
-// ContextKey because Go throws a warning if I use a string directly
-// to access a value by in request context
-type ContextKey string
-
 // Auth checks for the Authorization header, decodes
 // the token and adds the user to request context.
 func Auth(c db.Conn, next http.Handler) http.Handler {
@@ -36,7 +32,6 @@ func Auth(c db.Conn, next http.Handler) http.Handler {
 		}
 
 		user, _ := query.GetUser(c, claims.PhoneNo)
-		// key := ContextKey("user")
 		key := "user"
 		ctx := context.WithValue(r.Context(), key, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
