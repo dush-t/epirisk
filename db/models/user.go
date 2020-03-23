@@ -9,12 +9,12 @@ import (
 
 // User represents the User entity stored in the database
 type User struct {
-	PhoneNo           string
-	Password          string
-	Name              string
-	Risk              float64
-	SuspectsInfection bool
-	Infected          bool
+	PhoneNo      string
+	Password     string
+	Name         string
+	Risk         float64
+	HealthStatus float64
+	Infected     bool
 }
 
 type claims struct {
@@ -44,11 +44,12 @@ func (u User) GenerateJWT() (string, error) {
 func GetUserFromNode(n neo4j.Node) User {
 	u := n.Props()
 	user := User{
-		PhoneNo:  u["PhoneNo"].(string),
-		Password: u["Password"].(string),
-		Name:     u["Name"].(string),
-		Risk:     u["Risk"].(float64),
-		Infected: u["Infected"].(bool),
+		PhoneNo:      u["PhoneNo"].(string),
+		Password:     u["Password"].(string),
+		Name:         u["Name"].(string),
+		Risk:         u["Risk"].(float64),
+		HealthStatus: u["HealthStatus"].(float64),
+		Infected:     u["Infected"].(bool),
 	}
 
 	return user

@@ -15,10 +15,12 @@ func main() {
 	c := db.Conn{URI: uri}
 	c.Initialize(username, password)
 
-	http.Handle("/sign_in", api.SignInHandler(c))
-	http.Handle("/sign_up", api.SignUpHandler(c))
-	http.Handle("/met_user", middleware.Auth(c, api.MetUserHandler(c)))
-	http.Handle("/update_self_risk", middleware.Auth(c, api.UpdateSelfRisk(c)))
+	// TODO Find a way to make this middleware chaining less ugly
+	http.Handle("/sign_in", middleware.LogReq(api.SignInHandler(c)))
+	http.Handle("/sign_up", middleware.LogReq(api.SignUpHandler(c)))
+	http.Handle("/met_user", middleware.LogReq(middleware.Auth(c, api.MetUserHandler(c))))
+	http.Handle("/update_self_healthstatus", middleware.LogReq(middleware.Auth(c, api.UpdateSelfHealthStatus(c))))
+	http.Handle("/get_contact_summary", middleware.LogReq(middleware.Auth(c, api.GetContactSummary(c))))
 
 	log.Println("HTTP server started on :8000")
 	err := http.ListenAndServe(":8000", nil)
