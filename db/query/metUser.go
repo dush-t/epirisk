@@ -20,6 +20,11 @@ func MetUser(c db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64) (mo
 	}
 	defer session.Close()
 
+	/*
+		ceil(abs(u2.HealthStatus-u1.HealthStatus) + u2.HealthStatus-u1.HealthStatus)
+		is 0 when u2.HealthStatus < u1.HealthStatus, 1 otherwise. This is used to only
+		increase risk for person with lower health status.
+	*/
 	edgeTimeSpent, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			`
@@ -28,6 +33,8 @@ func MetUser(c db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64) (mo
 			MERGE (u1)-[r:MET]-(u2)
 				ON CREATE SET r.TimeSpent = $timeSpent
 				ON MATCH SET r.TimeSpent = r.TimeSpent + $timeSpent
+			SET u1.Risk = u1.Risk + ceil(abs(u2.HealthStatus-u1.HealthStatus) + u2.HealthStatus-u1.HealthStatus) * u2.HealthStatus * $timeSpent
+			SET u2.Risk = u2.Risk + ceil(abs(u1.HealthStatus-u2.HealthStatus) + u1.HealthStatus-u2.HealthStatus) * u1.HealthStatus * $timeSpent
 			RETURN r.TimeSpent
 			`,
 			db.QueryContext{
