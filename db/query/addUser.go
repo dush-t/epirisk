@@ -29,8 +29,8 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 				SET user.Password = $password 
 				SET user.Name = $name 
 				SET user.Risk = 0.0 
-				SET user.Infected = false
-				SET user.SuspectsInfection = false
+				SET user.Infected = false 
+				SET user.HealthStatus = 0.0
 			RETURN user
 			`,
 			db.QueryContext{

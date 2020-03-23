@@ -41,23 +41,31 @@ func MetUserHandler(c db.Conn) http.Handler {
 	})
 }
 
-// UpdateSelfRisk is the handler called at /update_self_risk
-func UpdateSelfRisk(c db.Conn) http.Handler {
+// UpdateSelfHealthStatus is the handler called at /update_self_risk
+func UpdateSelfHealthStatus(c db.Conn) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 
 		var reqBody struct {
-			SelfDiagnosedRisk float64 `json:"selfDiagnosedRisk"`
+			HealthStatus float64
 		}
 		err := json.NewDecoder(r.Body).Decode(&reqBody)
-		riskValueAllowed := util.RiskValueIsAllowed(reqBody.SelfDiagnosedRisk)
+		riskValueAllowed := util.HealthStatusValueIsAllowed(reqBody.HealthStatus)
 
 		if err != nil || !riskValueAllowed {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		user, err = query.MarkSelfInfected(c, user, reqBody.SelfDiagnosedRisk)
+		if !util.RiskShouldBeRecalculated(user.HealthStatus, reqBody.HealthStatus) {
+			log.Println("No need to calculate new health status", user.HealthStatus, reqBody.HealthStatus)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		healthStatusChange := reqBody.HealthStatus - user.HealthStatus
+
+		user, err = query.MarkSelfInfected(c, user, healthStatusChange)
 		if err != nil {
 			log.Fatal("Error connecting to the database:", err)
 			w.WriteHeader(http.StatusInternalServerError)
