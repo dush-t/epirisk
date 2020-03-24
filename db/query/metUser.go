@@ -11,7 +11,7 @@ import (
 // MetUser takes a models.User struct and a phoneNo and adds
 // an edge between the user corresponding to the struct and
 // the one corresponding to the phoneNo
-func MetUser(c db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64) (models.Edge, error) {
+func MetUser(c db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, meetingTime int64) (models.Edge, error) {
 	driver := *(c.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
@@ -33,14 +33,14 @@ func MetUser(c db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64) (mo
 			MERGE (u1)-[r:MET]-(u2)
 				ON CREATE SET r.TimeSpent = $timeSpent
 				ON MATCH SET r.TimeSpent = r.TimeSpent + $timeSpent
-			SET u1.Risk = u1.Risk + ceil(abs(u2.HealthStatus-u1.HealthStatus) + u2.HealthStatus-u1.HealthStatus) * u2.HealthStatus * $timeSpent
-			SET u2.Risk = u2.Risk + ceil(abs(u1.HealthStatus-u2.HealthStatus) + u1.HealthStatus-u2.HealthStatus) * u1.HealthStatus * $timeSpent
+			SET r.LastMet = $lastMet
 			RETURN r.TimeSpent
 			`,
 			db.QueryContext{
 				"u1PhoneNo": u1PhoneNo,
 				"u2PhoneNo": u2PhoneNo,
 				"timeSpent": timeSpent,
+				"lastMet":   meetingTime,
 			},
 		)
 

@@ -17,8 +17,9 @@ func MetUserHandler(c db.Conn) http.Handler {
 		user := r.Context().Value("user").(models.User)
 
 		var reqBody struct {
-			PhoneNo   string `json:"phoneNo"`
-			TimeSpent int64  `json:"timeSpent"`
+			PhoneNo     string `json:"phoneNo"`
+			TimeSpent   int64  `json:"timeSpent"`
+			MeetingTime int64  `json:"meetingTime"`
 		}
 		err := json.NewDecoder(r.Body).Decode(&reqBody)
 		if err != nil {
@@ -26,7 +27,7 @@ func MetUserHandler(c db.Conn) http.Handler {
 			return
 		}
 
-		edge, err := query.MetUser(c, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent)
+		edge, err := query.MetUser(c, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent, reqBody.MeetingTime)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -57,15 +58,7 @@ func UpdateSelfHealthStatus(c db.Conn) http.Handler {
 			return
 		}
 
-		if !util.RiskShouldBeRecalculated(user.HealthStatus, reqBody.HealthStatus) {
-			log.Println("No need to calculate new health status", user.HealthStatus, reqBody.HealthStatus)
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		healthStatusChange := reqBody.HealthStatus - user.HealthStatus
-
-		user, err = query.MarkSelfInfected(c, user, healthStatusChange)
+		user, err = query.UpdateHealthStatus(c, user, user.HealthStatus, reqBody.HealthStatus)
 		if err != nil {
 			log.Fatal("Error connecting to the database:", err)
 			w.WriteHeader(http.StatusInternalServerError)
