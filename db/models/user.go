@@ -12,9 +12,7 @@ type User struct {
 	PhoneNo      string
 	Password     string
 	Name         string
-	Risk         float64
 	HealthStatus float64
-	Infected     bool
 }
 
 type claims struct {
@@ -47,9 +45,7 @@ func GetUserFromNode(n neo4j.Node) User {
 		PhoneNo:      u["PhoneNo"].(string),
 		Password:     u["Password"].(string),
 		Name:         u["Name"].(string),
-		Risk:         u["Risk"].(float64),
 		HealthStatus: u["HealthStatus"].(float64),
-		Infected:     u["Infected"].(bool),
 	}
 
 	return user

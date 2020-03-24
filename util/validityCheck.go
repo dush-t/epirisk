@@ -10,9 +10,3 @@ func HealthStatusValueIsAllowed(risk float64) bool {
 	}
 	return (allowedValues[risk] == true)
 }
-
-// RiskShouldBeRecalculated decides whether to update the risk of surrounding
-// nodes when user updates his health status
-func RiskShouldBeRecalculated(prevHealthStatus float64, newHealthStatus float64) bool {
-	return newHealthStatus > prevHealthStatus
-}

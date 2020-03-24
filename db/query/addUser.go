@@ -28,8 +28,6 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 				SET user.PhoneNo = $phoneNo 
 				SET user.Password = $password 
 				SET user.Name = $name 
-				SET user.Risk = 0.0 
-				SET user.Infected = false 
 				SET user.HealthStatus = 0.0
 			RETURN user
 			`,
@@ -39,7 +37,7 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 				"name":     name,
 			})
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 			return nil, err
 		}
 
@@ -51,7 +49,7 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return models.User{}, err
 	}
 
