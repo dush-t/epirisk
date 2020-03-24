@@ -12,7 +12,6 @@ type summaryData struct {
 type ContactSummary struct {
 	First  summaryData
 	Second summaryData
-	Third  summaryData
 }
 
 func buildSummaryData(summary neo4j.Record, index string) summaryData {
@@ -31,7 +30,6 @@ func BuildContactSummary(summary neo4j.Record) ContactSummary {
 	result := ContactSummary{
 		First:  buildSummaryData(summary, "first"),
 		Second: buildSummaryData(summary, "second"),
-		Third:  buildSummaryData(summary, "third"),
 	}
 	return result
 }

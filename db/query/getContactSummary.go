@@ -22,19 +22,21 @@ func GetContactSummary(c db.Conn, u models.User) (models.ContactSummary, error) 
 	summary, err := session.ReadTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			`
-			MATCH (u10:User {PhoneNo: $phoneNo})-[r11:MET]-(u11:User)-[r12:MET]-(u12:User)-[r13:MET]-(u13:User)
-			WHERE u11.HealthStatus = 0.8 AND u12.HealthStatus = 0.8 AND u13.HealthStatus = 0.8
+			MATCH (u10:User {PhoneNo: $phoneNo})-[r11:MET]-(u11:User)-[r12:MET]-(u12:User)
+			WHERE id(u10) <> id(u12) 
+			AND u11.HealthStatus = 0.8 AND u12.HealthStatus = 0.8
 
-			MATCH (u10)-[r21:MET]-(u22:User)-[r22:MET]-(u23:User)
-			WHERE u21.HealthStatus = 1.0 AND u22.HealthStatus = 1.0 AND u23.HealthStatus = 1.0
+			WITH u10
+
+			MATCH (u10)-[r21:MET]-(u21:User)-[r22:MET]-(u22:User)
+			WHERE id(u10) <> id(u22)
+			AND u21.HealthStatus = 1.0 AND u22.HealthStatus = 1.0
 			
 			RETURN
 				count(u11) as firstWithSymptoms
 				count(u12) as secondWithSymptoms
-				count(u13) as thirdithSymptoms
 				count(u21) as firstPositive
 				count(u22) as secondPositive
-				count(u23) as thirPositive
 				sum(r11.TimeSpent) as firstWithSymptomsTimeSpent
 				sum(r21.TimeSpent) as firstPositiveTimeSpent
 			`,
