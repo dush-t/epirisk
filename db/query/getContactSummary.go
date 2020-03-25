@@ -3,6 +3,7 @@ package query
 import (
 	"log"
 
+	"github.com/dush-t/epirisk/constants"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
@@ -22,26 +23,23 @@ func GetContactSummary(c db.Conn, u models.User) (models.ContactSummary, error) 
 	summary, err := session.ReadTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			`
-			MATCH (u10:User {PhoneNo: $phoneNo})-[r11:MET]-(u11:User)-[r12:MET]-(u12:User)
-			WHERE id(u10) <> id(u12) 
-			AND u11.HealthStatus = 0.8 AND u12.HealthStatus = 0.8
-
-			WITH u10
-
-			MATCH (u10)-[r21:MET]-(u21:User)-[r22:MET]-(u22:User)
-			WHERE id(u10) <> id(u22)
-			AND u21.HealthStatus = 1.0 AND u22.HealthStatus = 1.0
-			
-			RETURN
-				count(u11) as firstWithSymptoms
-				count(u12) as secondWithSymptoms
-				count(u21) as firstPositive
-				count(u22) as secondPositive
-				sum(r11.TimeSpent) as firstWithSymptomsTimeSpent
-				sum(r21.TimeSpent) as firstPositiveTimeSpent
+			MATCH (u0:User {PhoneNo: $phoneNo})
+			WITH u0
+			MATCH (u0)-[r1:MET]-(u1:User)
+			WITH sum(CASE WHEN u1.HealthStatus = 0.9 THEN 1 ELSE 0 END) as firstWSCount,
+				 sum(CASE WHEN u1.HealthStatus = 1.0 THEN 1 ELSE 0 END) as firstPCount,
+				 sum(CASE WHEN u1.HealthStatus = 0.9 THEN r1.TimeSpent ELSE 0 END) as wsTimeSpent,
+				 sum(CASE WHEN u1.HealthStatus = 1.0 THEN r1.TimeSpent ELSE 0 END) as pTimeSpent,
+				 u0
+			MATCH (u0)-[:MET*2]-(u2:User)
+			WHERE NOT((u0)-[:MET]-(u2)) AND u0.PhoneNo <> u2.PhoneNo
+			RETURN sum(CASE WHEN u2.HealthStatus = 1.0 THEN 1 ELSE 0 END ) as secondPCount,
+				   sum(CASE WHEN u2.HealthStatus = 0.9 THEN 1 ELSE 0 END) as secondWSCount,
+				   firstWSCount, firstPCount, wsTimeSpent, pTimeSpent
 			`,
 			db.QueryContext{
-				"phoneNo": u.PhoneNo,
+				"phoneNo":      u.PhoneNo,
+				"healthStatus": constants.FeelingSymptomsHealthStatus,
 			},
 		)
 
@@ -66,3 +64,20 @@ func GetContactSummary(c db.Conn, u models.User) (models.ContactSummary, error) 
 	return contactSummaryEntity, nil
 
 }
+
+// WITH u0, count(u1) as firstWithSymptoms, r1
+
+// 			MATCH (u0)-[:MET]-(:User)-[:MET]-(u2:User)
+// 			WHERE id(u0) <> id(u2) AND u2.HealthStatus = 0.9
+
+// 			WITH u0, firstWithSymptoms, count(u2) as secondWithSymptoms, r1
+
+// 			MATCH (u0)-[r3:MET]-(u3:User)
+// 			WHERE u3.HealthStatus = 1.0
+
+// 			WITH u0, firstWithSymptoms, secondWithSymptoms, count(u3) as firstPositive, r1, r3
+
+// 			MATCH (u0)-[:MET]-(:User)-[:MET]-(u4:User)
+// 			WHERE id(u0) <> id(u4) AND u4.HealthStatus = 1.0
+
+// 			RETURN firstWithSymptoms
