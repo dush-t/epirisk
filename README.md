@@ -21,3 +21,6 @@ it's the server's job to calculate risk and stuff.
 
 ### How does the mobile app detect that another smartphone is in the vicinity? 
 I'm not sure yet. Perhaps bluetooth messaging via Google's Nearby API would do the trick. Lets see.
+
+## NOTE
+I appreciate it if you want to work on this project, but please refrain from cloning the project. If you want to build on top of it, please fork this repository instead of cloning it. That way, I can keep track of what others are doing with my code. It also makes some stuff around intellectual property easier. I explicitly disallow using my code without notifying me first (I'll consider forking a way of notifying).
