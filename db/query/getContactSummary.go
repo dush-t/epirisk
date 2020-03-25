@@ -64,20 +64,3 @@ func GetContactSummary(c db.Conn, u models.User) (models.ContactSummary, error) 
 	return contactSummaryEntity, nil
 
 }
-
-// WITH u0, count(u1) as firstWithSymptoms, r1
-
-// 			MATCH (u0)-[:MET]-(:User)-[:MET]-(u2:User)
-// 			WHERE id(u0) <> id(u2) AND u2.HealthStatus = 0.9
-
-// 			WITH u0, firstWithSymptoms, count(u2) as secondWithSymptoms, r1
-
-// 			MATCH (u0)-[r3:MET]-(u3:User)
-// 			WHERE u3.HealthStatus = 1.0
-
-// 			WITH u0, firstWithSymptoms, secondWithSymptoms, count(u3) as firstPositive, r1, r3
-
-// 			MATCH (u0)-[:MET]-(:User)-[:MET]-(u4:User)
-// 			WHERE id(u0) <> id(u4) AND u4.HealthStatus = 1.0
-
-// 			RETURN firstWithSymptoms
