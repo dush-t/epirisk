@@ -10,6 +10,10 @@ import (
 	"github.com/dush-t/epirisk/middleware"
 )
 
+type Config struct {
+	DBConn db.Conn
+}
+
 func main() {
 	uri, username, password := getDBConnectionParams()
 	c := db.Conn{URI: uri}
