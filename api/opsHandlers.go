@@ -5,14 +5,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/dush-t/epirisk/db/query"
+	"github.com/dush-t/epirisk/init"
 	"github.com/dush-t/epirisk/util"
 )
 
 // MetUserHandler is the handler called at /met_user
-func MetUserHandler(c db.Conn) http.Handler {
+func MetUserHandler(c init.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 
@@ -43,7 +43,7 @@ func MetUserHandler(c db.Conn) http.Handler {
 }
 
 // UpdateSelfHealthStatus is the handler called at /update_self_risk
-func UpdateSelfHealthStatus(c db.Conn) http.Handler {
+func UpdateSelfHealthStatus(c init.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 

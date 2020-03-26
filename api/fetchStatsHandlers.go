@@ -5,14 +5,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/dush-t/epirisk/db/query"
+	"github.com/dush-t/epirisk/init"
 )
 
 // GetContactSummary will return a JSON response of the ContactSummary
 // of the user
-func GetContactSummary(c db.Conn) http.Handler {
+func GetContactSummary(c init.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 

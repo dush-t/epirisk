@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/query"
+	"github.com/dush-t/epirisk/init"
 	"github.com/dush-t/epirisk/util"
 )
 
@@ -18,7 +18,7 @@ type Claims struct {
 }
 
 // SignInHandler is the handler function for requests at /sign_in
-func SignInHandler(c db.Conn) http.Handler {
+func SignInHandler(c init.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Decode request body
 		var data struct {
@@ -58,7 +58,7 @@ func SignInHandler(c db.Conn) http.Handler {
 }
 
 // SignUpHandler is the handler function for requests at /sign_up
-func SignUpHandler(c db.Conn) http.Handler {
+func SignUpHandler(c init.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var data struct {
 			PhoneNo  string `json:"phoneNo"`

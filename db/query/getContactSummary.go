@@ -6,13 +6,15 @@ import (
 	"github.com/dush-t/epirisk/constants"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
+	"github.com/dush-t/epirisk/init"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
 // GetContactSummary will query the database and return information about
 // the health statuses of people around the user
-func GetContactSummary(c db.Conn, u models.User) (models.ContactSummary, error) {
-	driver := *(c.Driver)
+func GetContactSummary(c init.Config, u models.User) (models.ContactSummary, error) {
+	dbconn := c.DBConn
+	driver := *(dbconn.Driver)
 	session, err := driver.Session(neo4j.AccessModeRead)
 	if err != nil {
 		log.Fatal("Error connecting to database:", err)
