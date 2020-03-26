@@ -14,7 +14,7 @@ func (eb *EventBus) Register(er EventRoute) {
 
 // Publish takes an event and routes it to the appropriate
 // route
-func (eb *EventBus) Publish(ed EventData) {
+func (eb *EventBus) Publish(ed Event) {
 	route := (*eb).routes[ed.topic]
 	route.Consume(ed)
 }
