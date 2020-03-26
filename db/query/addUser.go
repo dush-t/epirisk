@@ -10,7 +10,7 @@ import (
 )
 
 // AddUser adds a new user to the database
-func AddUser(c db.Conn, phoneNo string, password string, name string) (models.User, error) {
+func AddUser(c db.Conn, phoneNo, password, name, regToken string) (models.User, error) {
 	driver := *(c.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
@@ -20,14 +20,17 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 	defer session.Close()
 
 	passwordHash, _ := util.HashPassword(password)
+	anonID := util.GenerateAnonID(phoneNo)
 
 	user, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			`
 			CREATE (user:User) 
 				SET user.PhoneNo = $phoneNo 
+				SET user.AnonID = $anonID
 				SET user.Password = $password 
 				SET user.Name = $name 
+				SET user.RegToken = $regToken 
 				SET user.HealthStatus = 0.0
 			RETURN user
 			`,
@@ -35,6 +38,8 @@ func AddUser(c db.Conn, phoneNo string, password string, name string) (models.Us
 				"phoneNo":  phoneNo,
 				"password": passwordHash,
 				"name":     name,
+				"regToken": regToken,
+				"anonID":   anonID,
 			})
 		if err != nil {
 			log.Println(err)

@@ -9,7 +9,9 @@ import (
 
 // User represents the User entity stored in the database
 type User struct {
+	AnonID       string
 	PhoneNo      string
+	RegToken     string
 	Password     string
 	Name         string
 	HealthStatus float64
@@ -42,7 +44,9 @@ func (u User) GenerateJWT() (string, error) {
 func GetUserFromNode(n neo4j.Node) User {
 	u := n.Props()
 	user := User{
+		AnonID:       u["AnonID"].(string),
 		PhoneNo:      u["PhoneNo"].(string),
+		RegToken:     u["RegToken"].(string),
 		Password:     u["Password"].(string),
 		Name:         u["Name"].(string),
 		HealthStatus: u["HealthStatus"].(float64),

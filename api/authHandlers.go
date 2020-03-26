@@ -64,6 +64,7 @@ func SignUpHandler(c db.Conn) http.Handler {
 			PhoneNo  string `json:"phoneNo"`
 			Password string `json:"password"`
 			Name     string `json:"name"`
+			RegToken string `json:"regToken"`
 		}
 		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
@@ -71,7 +72,7 @@ func SignUpHandler(c db.Conn) http.Handler {
 			return
 		}
 
-		user, err := query.AddUser(c, data.PhoneNo, data.Password, data.Name)
+		user, err := query.AddUser(c, data.PhoneNo, data.Password, data.Name, data.RegToken)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println("Error creating user:", err)
