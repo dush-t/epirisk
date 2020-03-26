@@ -38,8 +38,20 @@ type WorkerList []Worker
 // Bus is an entity that can route events to different EventRoutes
 // based on their topic
 type Bus interface {
+	// Init is used to build a Bus by registering
+	// multiple EventRoutes in it. It's like a constructor
+	Init([]EventRoute)
 	// Register adds a new 'endpoint' to the bus
 	Register(EventRoute)
 	// Publish pushes a new event to the Bus
 	Publish(Event)
+}
+
+// AppNotification represents the data required to push a notification
+// to a device using FCM
+type AppNotification struct {
+	title     string
+	body      string
+	notifType string
+	channel   string
 }
