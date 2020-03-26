@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/dush-t/epirisk/api"
-	"github.com/dush-t/epirisk/init"
+	"github.com/dush-t/epirisk/config"
 	"github.com/dush-t/epirisk/middleware"
 )
 
 func main() {
-	config := init.InitializeApp()
+	config := config.InitializeApp()
 
 	// TODO Find a way to make this middleware chaining less ugly
 	http.Handle("/sign_in", middleware.LogReq(api.SignInHandler(config)))

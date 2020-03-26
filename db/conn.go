@@ -16,9 +16,9 @@ type Conn struct {
 // neo4j transactions for dynamic queries
 type QueryContext map[string]interface{}
 
-// Initialize actually connects to the database
+// Connect connects to the database
 // and store driver information in the connection struct
-func (c *Conn) Initialize(username string, password string) {
+func (c *Conn) Connect(username string, password string) {
 	driver, err := neo4j.NewDriver(c.URI, neo4j.BasicAuth(username, password, ""))
 	if err != nil {
 		log.Fatal("Unable to connect to database:", err)

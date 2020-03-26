@@ -3,15 +3,15 @@ package query
 import (
 	"log"
 
+	"github.com/dush-t/epirisk/config"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
-	"github.com/dush-t/epirisk/init"
 	"github.com/dush-t/epirisk/util"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
 // AddUser adds a new user to the database
-func AddUser(c init.Config, phoneNo, password, name, regToken string) (models.User, error) {
+func AddUser(c config.Config, phoneNo, password, name, regToken string) (models.User, error) {
 	dbconn := c.DBConn
 	driver := *(dbconn.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)

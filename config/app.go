@@ -1,7 +1,6 @@
-package init
+package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/dush-t/epirisk/db"
@@ -14,11 +13,7 @@ import (
 type Config struct {
 	DBConn   db.Conn
 	Bus      events.Bus
-	Firebase firebaseConfig
-}
-
-type firebaseConfig struct {
-	FCMKey string
+	Firebase FirebaseConf
 }
 
 // InitializeApp does everything required to start the app
@@ -26,20 +21,24 @@ type firebaseConfig struct {
 // It returns a config object from environment variables which
 // is to be used throughout the app using dependency injection
 func InitializeApp() Config {
+	var conf Config
+
+	// Connect to database
 	uri, username, password := getDBConnectionParams()
 	c := db.Conn{URI: uri}
-	c.Initialize(username, password)
+	c.Connect(username, password)
+	conf.DBConn = c
 
-	bus := events.MakeBus()
+	// Initialize Firebase
+	var f FirebaseConf
+	f.Init()
+	conf.Firebase = f
 
-	fConfig := getFirebaseConfig()
+	// Initializer Bus for events
+	bus := MakeBus(conf)
+	conf.Bus = bus
 
-	return Config{
-		DBConn:   c,
-		Bus:      bus,
-		Firebase: fConfig,
-	}
-
+	return conf
 }
 
 // getDBConnectionParams gets information needed to connect to the
@@ -55,15 +54,4 @@ func getDBConnectionParams() (string, string, string) {
 
 	// Change the default values from here
 	return "bolt://localhost:7687", "neo4j", "lolmao12345"
-}
-
-func getFirebaseConfig() firebaseConfig {
-	fcmKey, found := os.LookupEnv("FIREBASE_FCM_KEY")
-	if !found {
-		log.Fatal("Firebase FCM key not found in environment. Quitting.")
-	}
-
-	return firebaseConfig{
-		FCMKey: fcmKey,
-	}
 }
