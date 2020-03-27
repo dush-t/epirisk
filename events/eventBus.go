@@ -22,10 +22,12 @@ func (eb *EventBus) Publish(ed Event) {
 	route.Consume(ed)
 }
 
-// Start should be used to initialize the EventBus with EventRoutes
+// Init should be used to initialize the EventBus with EventRoutes
 // by repeatedly calling Register()
 func (eb *EventBus) Init(b BusConf, routes []EventRoute) {
 	log.Println("Starting EventBus.")
+	routeMap := make(map[string]EventRoute)
+	(*eb).routes = routeMap
 	(*eb).conf = b
 	for _, route := range routes {
 		(*eb).routes[route.Topic().(string)] = route
