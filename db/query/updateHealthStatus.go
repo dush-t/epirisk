@@ -2,7 +2,6 @@ package query
 
 import (
 	"log"
-	"reflect"
 	"time"
 
 	"github.com/dush-t/epirisk/constants"
@@ -12,8 +11,11 @@ import (
 )
 
 func getQueryForStatus(initHStatus, finalHStatus float64) string {
-	query := `MATCH (u0:User {PhoneNo: $u0PhoneNo})-[r1:MET]-(u1:User) 
-				WHERE r1.LastMet > $minTime `
+	query := `MATCH (u0:User {PhoneNo: $u0PhoneNo})
+			  WITH u0
+			  MATCH (u01:User {PhoneNo: $u0PhoneNo})-[r1:MET]-(u1:User) 
+			  WHERE r1.LastMet > $minTime `
+
 	if finalHStatus == 1.0 {
 		query += `SET u0:POSITIVE SET u0.TestedPositiveTimestamp = $healthStatusChangeTimestamp`
 	}
@@ -35,18 +37,18 @@ func getQueryForStatus(initHStatus, finalHStatus float64) string {
 
 // UpdateHealthStatus marks the infected value to true in the database and
 // sets risk for other nodes around the infected node.
-func UpdateHealthStatus(d db.Conn, u models.User, initHStatus float64, finalHStatus float64) (models.User, error) {
+func UpdateHealthStatus(d db.Conn, u models.User, initHStatus float64, finalHStatus float64) (map[string]interface{}, error) {
 	driver := *(d.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
-		return models.User{}, err
+		return nil, err
 	}
 	defer session.Close()
 
 	query := getQueryForStatus(initHStatus, finalHStatus)
 
-	user, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+	data, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			query,
 			db.QueryContext{
@@ -62,11 +64,23 @@ func UpdateHealthStatus(d db.Conn, u models.User, initHStatus float64, finalHSta
 		}
 
 		if result.Next() {
-			log.Println("Keys:", result.Record().Keys())
-			nodeList, _ := result.Record().Get("u1")
-			log.Println("nodelist type:", reflect.TypeOf(nodeList))
-			log.Println(nodeList)
-			return result.Record().GetByIndex(0), nil
+			res := make(map[string]interface{})
+
+			contact := models.GetUserFromNode(result.Record().GetByIndex(1).(neo4j.Node))
+			firstContactList := []models.User{contact}
+
+			res["user"] = models.GetUserFromNode(result.Record().GetByIndex(0).(neo4j.Node))
+
+			for {
+				if result.Next() {
+					contact = models.GetUserFromNode(result.Record().GetByIndex(1).(neo4j.Node))
+					firstContactList = append(firstContactList, contact)
+				} else {
+					break
+				}
+			}
+			res["firstContactList"] = firstContactList
+			return res, nil
 		}
 
 		return nil, result.Err()
@@ -74,12 +88,8 @@ func UpdateHealthStatus(d db.Conn, u models.User, initHStatus float64, finalHSta
 
 	if err != nil {
 		log.Fatal("Database Access Error:", err)
-		return models.User{}, nil
+		return nil, err
 	}
 
-	// go events.UserTestedPositive(user, {user})
-
-	userEntity := models.GetUserFromNode(user.(neo4j.Node))
-
-	return userEntity, nil
+	return data.(map[string]interface{}), nil
 }

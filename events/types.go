@@ -2,10 +2,7 @@ package events
 
 // Event contains information about the Topic of the event (used
 // to determine where the event will be sent) and the data of the event
-type Event struct {
-	topic string
-	data  interface{}
-}
+type Event interface{}
 
 // EventChan is a channel for the Event data type
 type EventChan chan Event
@@ -44,16 +41,16 @@ type Bus interface {
 	// Register adds a new 'endpoint' to the bus
 	Register(EventRoute)
 	// Publish pushes a new event to the Bus
-	Publish(Event)
+	Publish(string, Event)
 }
 
 // AppNotification represents the data required to push a notification
 // to a device using FCM
 type AppNotification struct {
-	title     string
-	body      string
-	notifType string
-	channel   string
+	Title     string
+	Body      string
+	NotifType string
+	Channel   string
 }
 
 // BusConf contains information needed by the Bus (passed using

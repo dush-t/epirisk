@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dush-t/epirisk/constants"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/dush-t/epirisk/db/query"
@@ -59,12 +60,41 @@ func UpdateSelfHealthStatus(d db.Conn, b events.Bus) http.Handler {
 			return
 		}
 
-		user, err = query.UpdateHealthStatus(d, user, user.HealthStatus, reqBody.HealthStatus)
+		data, err := query.UpdateHealthStatus(d, user, user.HealthStatus, reqBody.HealthStatus)
 		if err != nil {
 			log.Fatal("Error connecting to the database:", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		user = data["user"].(models.User)
+		firstContacts := data["firstContactList"].([]models.User)
+
+		var n events.AppNotification
+		n.NotifType = "HS_CHANGE"
+		n.Channel = "HS_CHANGE"
+		n.Title = "Alert!"
+
+		var route string
+		switch reqBody.HealthStatus {
+		case constants.FeelingSymptomsHealthStatus:
+			n.Body = "A user you met in the last 14 days has started feeling symptoms."
+			route = constants.HSFeelingSymptomsChannelName
+		case 1.0:
+			n.Body = "A user you met in the last 14 days has been tested positive."
+			route = constants.HSPositiveChannelName
+		case 0.0:
+			n.Body = "A user you met in the last 14 days has completely recovered!"
+			route = constants.HSCuredChannelName
+		}
+
+		statusChangeEvent := struct {
+			user          models.User
+			firstContacts []models.User
+			notification  events.AppNotification
+		}{user, firstContacts, n}
+
+		b.Publish(route, events.Event(statusChangeEvent))
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
