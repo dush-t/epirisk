@@ -3,16 +3,14 @@ package query
 import (
 	"log"
 
-	"github.com/dush-t/epirisk/config"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
 
 // GetUser queries the database and gets a user by phoneNo.
-func GetUser(c config.Config, phoneNo string) (models.User, error) {
-	dbconn := c.DBConn
-	driver := *(dbconn.Driver)
+func GetUser(d db.Conn, phoneNo string) (models.User, error) {
+	driver := *(d.Driver)
 	session, err := driver.Session(neo4j.AccessModeRead)
 	if err != nil {
 		log.Fatal("Failed to connect to database")

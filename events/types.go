@@ -10,6 +10,13 @@ type Event struct {
 // EventChan is a channel for the Event data type
 type EventChan chan Event
 
+// Worker is just a function with accepts an Event and does
+// something with it
+type Worker func(Event)
+
+// WorkerList is a slice of workers
+type WorkerList []Worker
+
 // EventRoute is an entity that can consume events by passing them
 // to several registered workers
 type EventRoute interface {
@@ -28,19 +35,12 @@ type EventRoute interface {
 	RegisterWorker(Worker)
 }
 
-// Worker is just a function with accepts an Event and does
-// something with it
-type Worker func(Event)
-
-// WorkerList is a slice of workers
-type WorkerList []Worker
-
 // Bus is an entity that can route events to different EventRoutes
 // based on their topic
 type Bus interface {
 	// Init is used to build a Bus by registering
 	// multiple EventRoutes in it. It's like a constructor
-	Init([]EventRoute)
+	Init(BusConf, []EventRoute)
 	// Register adds a new 'endpoint' to the bus
 	Register(EventRoute)
 	// Publish pushes a new event to the Bus
@@ -54,4 +54,15 @@ type AppNotification struct {
 	body      string
 	notifType string
 	channel   string
+}
+
+// BusConf contains information needed by the Bus (passed using
+// dependency injection)
+type BusConf struct {
+	Firebase firebaseConf
+}
+
+// FirebaseConf contains data needed to interact with firebase (duh)
+type firebaseConf struct {
+	FCMKey string
 }

@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/dush-t/epirisk/config"
 	"github.com/dush-t/epirisk/constants"
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
@@ -36,9 +35,8 @@ func getQueryForStatus(initHStatus, finalHStatus float64) string {
 
 // UpdateHealthStatus marks the infected value to true in the database and
 // sets risk for other nodes around the infected node.
-func UpdateHealthStatus(c config.Config, u models.User, initHStatus float64, finalHStatus float64) (models.User, error) {
-	dbconn := c.DBConn
-	driver := *(dbconn.Driver)
+func UpdateHealthStatus(d db.Conn, u models.User, initHStatus float64, finalHStatus float64) (models.User, error) {
+	driver := *(d.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)

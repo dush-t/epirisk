@@ -5,14 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dush-t/epirisk/config"
+	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/models"
 	"github.com/dush-t/epirisk/db/query"
+	"github.com/dush-t/epirisk/events"
 	"github.com/dush-t/epirisk/util"
 )
 
 // MetUserHandler is the handler called at /met_user
-func MetUserHandler(c config.Config) http.Handler {
+func MetUserHandler(d db.Conn, b events.Bus) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 
@@ -27,7 +28,7 @@ func MetUserHandler(c config.Config) http.Handler {
 			return
 		}
 
-		edge, err := query.MetUser(c, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent, reqBody.MeetingTime)
+		edge, err := query.MetUser(d, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent, reqBody.MeetingTime)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -43,7 +44,7 @@ func MetUserHandler(c config.Config) http.Handler {
 }
 
 // UpdateSelfHealthStatus is the handler called at /update_self_risk
-func UpdateSelfHealthStatus(c config.Config) http.Handler {
+func UpdateSelfHealthStatus(d db.Conn, b events.Bus) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value("user").(models.User)
 
@@ -58,7 +59,7 @@ func UpdateSelfHealthStatus(c config.Config) http.Handler {
 			return
 		}
 
-		user, err = query.UpdateHealthStatus(c, user, user.HealthStatus, reqBody.HealthStatus)
+		user, err = query.UpdateHealthStatus(d, user, user.HealthStatus, reqBody.HealthStatus)
 		if err != nil {
 			log.Fatal("Error connecting to the database:", err)
 			w.WriteHeader(http.StatusInternalServerError)

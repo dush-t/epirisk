@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"os"
@@ -11,9 +11,9 @@ import (
 // down to functions in order to make the application work.
 // Dependency injection ftw.
 type Config struct {
-	DBConn   db.Conn
-	Bus      events.Bus
-	Firebase FirebaseConf
+	DBConn db.Conn
+	Bus    events.Bus
+	BConf  events.BusConf
 }
 
 // InitializeApp does everything required to start the app
@@ -30,12 +30,10 @@ func InitializeApp() Config {
 	conf.DBConn = c
 
 	// Initialize Firebase
-	var f FirebaseConf
-	f.Init()
-	conf.Firebase = f
+	var b = events.GetBusConf()
 
 	// Initializer Bus for events
-	bus := MakeBus(conf)
+	bus := events.MakeBus(b)
 	conf.Bus = bus
 
 	return conf

@@ -6,8 +6,9 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/dush-t/epirisk/config"
+	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/query"
+	"github.com/dush-t/epirisk/events"
 	"github.com/dush-t/epirisk/util"
 )
 
@@ -18,7 +19,7 @@ type Claims struct {
 }
 
 // SignInHandler is the handler function for requests at /sign_in
-func SignInHandler(c config.Config) http.Handler {
+func SignInHandler(d db.Conn, b events.Bus) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Decode request body
 		var data struct {
@@ -31,7 +32,7 @@ func SignInHandler(c config.Config) http.Handler {
 			return
 		}
 
-		user, err := query.GetUser(c, data.PhoneNo)
+		user, err := query.GetUser(d, data.PhoneNo)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -58,7 +59,7 @@ func SignInHandler(c config.Config) http.Handler {
 }
 
 // SignUpHandler is the handler function for requests at /sign_up
-func SignUpHandler(c config.Config) http.Handler {
+func SignUpHandler(d db.Conn, b events.Bus) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var data struct {
 			PhoneNo  string `json:"phoneNo"`
@@ -72,7 +73,7 @@ func SignUpHandler(c config.Config) http.Handler {
 			return
 		}
 
-		user, err := query.AddUser(c, data.PhoneNo, data.Password, data.Name, data.RegToken)
+		user, err := query.AddUser(d, data.PhoneNo, data.Password, data.Name, data.RegToken)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println("Error creating user:", err)

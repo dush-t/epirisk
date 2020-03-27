@@ -15,15 +15,15 @@ func (ner *NativeEventRoute) RegisterWorker(w Worker) {
 
 // Consume spawns a goroutine for every worker to work
 // on the event
-func (ner NativeEventRoute) Consume(e Event) {
-	for _, w := range ner.workers {
+func (ner *NativeEventRoute) Consume(e Event) {
+	for _, w := range (*ner).workers {
 		go w(e)
 	}
 }
 
 // Topic returns the topic of the EventRoute
-func (ner NativeEventRoute) Topic() interface{} {
-	return ner.topic
+func (ner *NativeEventRoute) Topic() interface{} {
+	return (*ner).topic
 }
 
 // Init is used for any initial setup of the EventRoute

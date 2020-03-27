@@ -7,13 +7,13 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dush-t/epirisk/api"
-	"github.com/dush-t/epirisk/config"
+	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/db/query"
 )
 
 // Auth checks for the Authorization header, decodes
 // the token and adds the user to request context.
-func Auth(c config.Config, next http.Handler) http.Handler {
+func Auth(d db.Conn, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := strings.Split(r.Header.Get("Authorization"), " ")[1]
 		claims := &api.Claims{}
@@ -31,7 +31,7 @@ func Auth(c config.Config, next http.Handler) http.Handler {
 			return
 		}
 
-		user, _ := query.GetUser(c, claims.PhoneNo)
+		user, _ := query.GetUser(d, claims.PhoneNo)
 		key := "user"
 		ctx := context.WithValue(r.Context(), key, user)
 		next.ServeHTTP(w, r.WithContext(ctx))

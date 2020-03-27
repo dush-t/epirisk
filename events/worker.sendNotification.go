@@ -1,20 +1,19 @@
-package workers
+package events
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/dush-t/epirisk/config"
 	"github.com/dush-t/epirisk/db/models"
-	"github.com/dush-t/epirisk/events"
 )
 
-func sendNotification(fcmKey string, u models.User, n events.AppNotification) {
+func sendNotification(fcmKey string, u models.User, n AppNotification) {
 	data := struct {
-		To   string                 `json:"to"`
-		Data events.AppNotification `json:"data"`
+		To   string          `json:"to"`
+		Data AppNotification `json:"data"`
 	}{
 		u.RegToken,
 		n,
@@ -39,8 +38,10 @@ func sendNotification(fcmKey string, u models.User, n events.AppNotification) {
 	defer resp.Body.Close()
 }
 
-func SendNotificationWorker(c config.Config) events.Worker {
-	return func(e events.Event) {
-
+// SendNotificationWorker returns a Worker that will send a
+// notification to a group of users using FCM
+func SendNotificationWorker(fcmKey string) Worker {
+	return func(e Event) {
+		fmt.Println("SendNotificationWorker : Sending notification :", e)
 	}
 }
