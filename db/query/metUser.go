@@ -11,12 +11,12 @@ import (
 // MetUser takes a models.User struct and a phoneNo and adds
 // an edge between the user corresponding to the struct and
 // the one corresponding to the phoneNo
-func MetUser(d db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, meetingTime int64) (models.Edge, error) {
+func MetUser(d db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, meetingTime int64) (map[string]interface{}, error) {
 	driver := *(d.Driver)
 	session, err := driver.Session(neo4j.AccessModeWrite)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
-		return models.Edge{}, err
+		return nil, err
 	}
 	defer session.Close()
 
@@ -25,7 +25,7 @@ func MetUser(d db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, mee
 		is 0 when u2.HealthStatus < u1.HealthStatus, 1 otherwise. This is used to only
 		increase risk for person with lower health status.
 	*/
-	edgeTimeSpent, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+	data, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 		result, err := transaction.Run(
 			`
 			MATCH (u1:User {PhoneNo: $u1PhoneNo})
@@ -34,7 +34,7 @@ func MetUser(d db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, mee
 				ON CREATE SET r.TimeSpent = $timeSpent
 				ON MATCH SET r.TimeSpent = r.TimeSpent + $timeSpent
 			SET r.LastMet = $lastMet
-			RETURN r.TimeSpent
+			RETURN r.TimeSpent, u2
 			`,
 			db.QueryContext{
 				"u1PhoneNo": u1PhoneNo,
@@ -49,18 +49,21 @@ func MetUser(d db.Conn, u1PhoneNo string, u2PhoneNo string, timeSpent int64, mee
 		}
 
 		if result.Next() {
-			return result.Record().GetByIndex(0), nil
+			userMet := models.GetUserFromNode(result.Record().GetByIndex(1).(neo4j.Node))
+			res := make(map[string]interface{})
+			res["edge"] = models.GenerateEdgeFromInt(result.Record().GetByIndex(0).(int64))
+			res["userMet"] = userMet
+			return res, nil
 		}
 
+		log.Println("Hello from a bug")
 		return nil, result.Err()
 	})
 
 	if err != nil {
 		log.Fatal("Error adding edge in database:", err)
-		return models.Edge{}, nil
+		return nil, err
 	}
 
-	edgeEntity := models.GenerateEdgeFromInt(edgeTimeSpent.(int64))
-
-	return edgeEntity, nil
+	return data.(map[string]interface{}), nil
 }

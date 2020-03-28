@@ -15,6 +15,7 @@ func MakeBus(b BusConf) Bus {
 		HSCuredRoute(b),
 		HSFeelingSymptomsRoute(b),
 		HSDiedRoute(b),
+		UsersMetRoute(b),
 	}
 	eb.Init(b, routes)
 	return &eb

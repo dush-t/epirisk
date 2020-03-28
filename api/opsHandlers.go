@@ -29,18 +29,32 @@ func MetUserHandler(d db.Conn, b events.Bus) http.Handler {
 			return
 		}
 
-		edge, err := query.MetUser(d, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent, reqBody.MeetingTime)
+		data, err := query.MetUser(d, user.PhoneNo, reqBody.PhoneNo, reqBody.TimeSpent, reqBody.MeetingTime)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
+		var timeSpent int64 = (data["edge"].(models.Edge)).TimeSpent
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		payload := struct {
 			TimeSpent int64 `json:"timeSpent"`
-		}{TimeSpent: edge.TimeSpent}
+		}{TimeSpent: timeSpent}
 		json.NewEncoder(w).Encode(payload)
+
+		// Emitting relevant events to the EventBus if the users have just started the meeting
+		if reqBody.TimeSpent == 0 {
+			var usersMetEvent = events.UsersMetEvent{
+				User1:     user,
+				User2:     data["userMet"].(models.User),
+				TimeSpent: timeSpent,
+			}
+
+			log.Println("########################################", b)
+			b.Publish(constants.UsersMetRouteName, events.Event(usersMetEvent))
+		}
 	})
 }
 
@@ -74,6 +88,7 @@ func UpdateSelfHealthStatus(d db.Conn, b events.Bus) http.Handler {
 		n.NotifType = "HS_CHANGE"
 		n.Channel = "HS_CHANGE"
 		n.Title = "Alert!"
+		n.To = firstContacts
 
 		var route string
 		switch reqBody.HealthStatus {
@@ -89,10 +104,9 @@ func UpdateSelfHealthStatus(d db.Conn, b events.Bus) http.Handler {
 		}
 
 		statusChangeEvent := struct {
-			user          models.User
-			firstContacts []models.User
-			notification  events.AppNotification
-		}{user, firstContacts, n}
+			user         models.User
+			notification events.AppNotification
+		}{user, n}
 
 		b.Publish(route, events.Event(statusChangeEvent))
 

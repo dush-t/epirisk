@@ -6,7 +6,7 @@ import "github.com/dush-t/epirisk/constants"
 func HSPositiveRoute(b BusConf) EventRoute {
 	var ner NativeEventRoute
 	ner.Init(constants.HSPositiveChannelName)
-	ner.RegisterWorker(SendNotificationWorker(b.Firebase.FCMKey))
+	ner.RegisterWorker(SendHSChangeNotificationWorker(b.Firebase.FCMKey))
 	return &ner
 }
 
@@ -14,7 +14,7 @@ func HSPositiveRoute(b BusConf) EventRoute {
 func HSFeelingSymptomsRoute(b BusConf) EventRoute {
 	var ner NativeEventRoute
 	ner.Init(constants.HSFeelingSymptomsChannelName)
-	ner.RegisterWorker(SendNotificationWorker(b.Firebase.FCMKey))
+	ner.RegisterWorker(SendHSChangeNotificationWorker(b.Firebase.FCMKey))
 	return &ner
 }
 

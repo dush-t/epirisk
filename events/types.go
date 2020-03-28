@@ -1,5 +1,7 @@
 package events
 
+import "github.com/dush-t/epirisk/db/models"
+
 // Event contains information about the Topic of the event (used
 // to determine where the event will be sent) and the data of the event
 type Event interface{}
@@ -47,6 +49,7 @@ type Bus interface {
 // AppNotification represents the data required to push a notification
 // to a device using FCM
 type AppNotification struct {
+	To        []models.User
 	Title     string
 	Body      string
 	NotifType string
@@ -62,4 +65,12 @@ type BusConf struct {
 // FirebaseConf contains data needed to interact with firebase (duh)
 type firebaseConf struct {
 	FCMKey string
+}
+
+// UsersMetEvent is an event that stores information about
+// a user meeting another user
+type UsersMetEvent struct {
+	User1     models.User
+	User2     models.User
+	TimeSpent int64
 }
