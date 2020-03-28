@@ -1,46 +1,26 @@
-# Dockerfile References: https://docs.docker.com/engine/reference/builder/
+FROM ubuntu:latest
 
-# Start from the latest golang base image
-FROM golang:latest as builder
+RUN apt-get install -y libssl1.0.0 
+RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
+RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
+RUN rm seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 
-# Add Maintainer Info
-LABEL maintainer="Dushyant Yadav <dushyant9309@gmail.com>"
+ENV GOLANG_VERSION 1.14.1
 
-# Add cgo dependencies
-RUN apk add --no-cache ca-certificates cmake make g++ openssl-dev git curl pkgconfig
+RUN curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz | tar -v -C /usr/local -xz
+ENV PATH /usr/local/go/bin:$PATH
 
-# Install seabolt
-RUN git clone -b 1.7 https://github.com/neo4j-drivers/seabolt.git /seabolt 
-WORKDIR /seabolt/build
-RUN cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_LIBDIR=lib .. && cmake --build . --target install
-# Set the Current Working Directory inside the container
+RUN mkdir -p /go/src /go/bin && chmod -R 777 /go
+ENV GOROOT /usr/local/go
+ENV GOPATH /go
+ENV PATH /go/bin:$PATH
+
 WORKDIR /app
 
-# Copy go mod and sum files
 COPY go.mod go.sum ./
 
-# Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
 
-# Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Build the Go app
-RUN go build -o main .
-
-
-######## Start a new stage from scratch #######
-FROM alpine:latest  
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/main .
-
-# Expose port 8080 to the outside world
-EXPOSE 8080
-
-# Command to run the executable
-CMD ["./main"] 
+RUN go build -0 main .
