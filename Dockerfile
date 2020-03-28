@@ -1,5 +1,8 @@
-FROM ubuntu:latest
+# Using ubuntu as base because I need to setup some C dependencies
+# that I couldn't setup with the golang base.
+FROM ubuntu:latest as builder
 
+# Setting up dependencies
 RUN apt-get update
 RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl 
  
@@ -7,6 +10,7 @@ RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabo
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN rm seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 
+# Installing GoLang 1.14.1
 ENV GOLANG_VERSION 1.14.1
 
 RUN curl -sSL https://storage.googleapis.com/golang/go$GOLANG_VERSION.linux-amd64.tar.gz | tar -v -C /usr/local -xz
@@ -17,14 +21,39 @@ ENV GOROOT /usr/local/go
 ENV GOPATH /go
 ENV PATH /go/bin:$PATH
 
+# Set current working directory inside the container
 WORKDIR /app
 
+# Download all dependencies. Doing this before the rest of the code so that dependencies
+# are cached by docker if there is no change in these two files, irrespective of changes in code
 COPY go.mod go.sum ./
-
 RUN go mod download
 
+# Installing pkg-config as it's needed to build the go project, probably due to some seabolt stuff.
 RUN apt-get install -y pkg-config
 
+# Copying source code
 COPY . .
 
+# Building
 RUN go build -o main .
+
+
+################################################ STAGE 2 #######################################################
+# Now building a lightweight image that just has the binary built in the previous project. MultiStage builds ftw!
+
+FROM alpine:latest
+
+# Install some basic dependencies
+RUN apk --no-cache add ca-certificates
+
+# Set /root as the working directory
+WORKDIR /root/
+
+# Copy the binary built in previous stage.
+COPY --from=builder /app/main .
+
+# Expose port 8000
+EXPOSE 8000
+
+CMD ["./main"]
