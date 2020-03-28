@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 RUN apt-get update
 RUN apt-get 
-RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl pkg-config
+RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl 
  
 RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
@@ -23,6 +23,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 RUN go mod download
+
+RUN apt-get install -y pkg-config
 
 COPY . .
 
