@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 RUN apt-get update
-RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release
+RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl
  
 RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
