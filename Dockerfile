@@ -38,22 +38,4 @@ COPY . .
 # Building
 RUN go build -o main .
 
-
-################################################ STAGE 2 #######################################################
-# Now building a lightweight image that just has the binary built in the previous project. MultiStage builds ftw!
-
-FROM alpine:latest
-
-# Install some basic dependencies
-RUN apk --no-cache add ca-certificates
-
-# Set /root as the working directory
-WORKDIR /root/
-
-# Copy the binary built in previous stage.
-COPY --from=builder /app/main .
-
-# Expose port 8000
-EXPOSE 8000
-
 CMD ["./main"]
