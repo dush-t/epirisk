@@ -18,8 +18,8 @@ func main() {
 	http.Handle("/update_self_healthstatus", middleware.LogReq(middleware.Auth(config.DBConn, api.UpdateSelfHealthStatus(config.DBConn, config.Bus))))
 	http.Handle("/get_contact_summary", middleware.LogReq(middleware.Auth(config.DBConn, api.GetContactSummary(config.DBConn, config.Bus))))
 
-	log.Println("HTTP server started on :8000")
-	err := http.ListenAndServe(":8000", nil)
+	log.Println("HTTP server started on :8080")
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("Error starting server:", err)
 	}

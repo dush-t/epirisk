@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -60,6 +61,7 @@ func InitializeApp() Config {
 // database (uri, username, password) from the environment.
 func getDBConnectionParams() (string, string, string) {
 	connectionURI, uriExists := os.LookupEnv("NEO4J_CONNECTION_URI")
+	fmt.Println(connectionURI)
 	dbUsername, usernameExists := os.LookupEnv("NEO4J_USERNAME")
 	dbPassword, passwordExists := os.LookupEnv("NEO4J_PASSWORD")
 
