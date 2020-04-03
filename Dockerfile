@@ -2,7 +2,7 @@
 # that I couldn't setup with the golang base.
 FROM ubuntu:18.04 as builder
 
-# Setting up dependencies
+# Setting up dependencie
 RUN apt-get update
 RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl build-essential
 RUN apt-get install -y pkg-config
