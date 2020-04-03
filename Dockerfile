@@ -37,7 +37,7 @@ RUN go mod download
 # Copying source code
 COPY . .
 
-# Building
+# Building the binary
 RUN go build -o main .
 
 EXPOSE 8080
