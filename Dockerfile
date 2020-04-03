@@ -6,7 +6,7 @@ FROM ubuntu:18.04 as builder
 RUN apt-get update
 RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl
 
-RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz -o pkgconf
+RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz -o pkgconfig.tgz
 RUN tar -zxf pkgconfig.tgz && cd pkg-config-0.29
 RUN ./configure && make install
  
