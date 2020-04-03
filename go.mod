@@ -3,7 +3,7 @@ module github.com/dush-t/epirisk
 go 1.14
 
 require (
-	cloud.google.com/go/pubsub v1.3.1 // indirect
+	cloud.google.com/go/pubsub v1.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/mock v1.4.3 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
@@ -16,6 +16,6 @@ require (
 	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
-	golang.org/x/tools v0.0.0-20200319210407-521f4a0cd458 // indirect
+	golang.org/x/tools v0.0.0-20200319210407-521f4a0cd458
 	golang.org/x/tools/gopls v0.3.4 // indirect
 )

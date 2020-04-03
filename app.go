@@ -7,7 +7,7 @@ import (
 
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/events"
-	"golang.org/x/tools/godoc/util"
+	"github.com/dush-t/epirisk/util"
 )
 
 // Config holds all the information that needs to be passed
