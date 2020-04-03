@@ -25,7 +25,7 @@ ENV PATH /go/bin:$PATH
 WORKDIR /app
 
 # Installing pkg-config as it's needed to build the go project, probably due to some seabolt stuff.
-RUN apt-get install -y pkg-config
+RUN apt-get install -y pkg-config --fix-missing
 
 # Download all dependencies. Doing this before the rest of the code so that dependencies
 # are cached by docker if there is no change in these two files, irrespective of changes in code
