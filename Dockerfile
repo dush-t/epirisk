@@ -4,7 +4,7 @@ FROM ubuntu:18.04 as builder
 
 # Setting up dependencies
 RUN apt-get update
-RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl 
+RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl  pkg-config
  
 RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
@@ -23,9 +23,6 @@ ENV PATH /go/bin:$PATH
 
 # Set current working directory inside the container
 WORKDIR /app
-
-# Installing pkg-config as it's needed to build the go project, probably due to some seabolt stuff.
-RUN apt-get install -y pkg-config --fix-missing
 
 # Download all dependencies. Doing this before the rest of the code so that dependencies
 # are cached by docker if there is no change in these two files, irrespective of changes in code
