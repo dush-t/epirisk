@@ -74,3 +74,10 @@ type UsersMetEvent struct {
 	User2     models.User
 	TimeSpent int64
 }
+
+// PubSubAgent represents an entity that can publish messages to some
+// pubsub service like Google Pubsub
+type PubSubAgent interface {
+	Init()
+	Publish(string, interface{})
+}

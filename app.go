@@ -2,9 +2,12 @@ package main
 
 import (
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/dush-t/epirisk/db"
 	"github.com/dush-t/epirisk/events"
+	"golang.org/x/tools/godoc/util"
 )
 
 // Config holds all the information that needs to be passed
@@ -16,12 +19,26 @@ type Config struct {
 	BConf  events.BusConf
 }
 
+// baseDir returns the path of the root of the project folder
+func baseDir() string {
+	_, b, _, _ := runtime.Caller(0)
+	return filepath.Dir(b)
+}
+
 // InitializeApp does everything required to start the app
 // including connecting to the database and creating an eventbus.
 // It returns a config object from environment variables which
 // is to be used throughout the app using dependency injection
 func InitializeApp() Config {
+	baseDir := baseDir()
 	var conf Config
+
+	// Initialize the environment variables
+	util.LoadEnvFromPath(baseDir)
+
+	// Setup gcloud auth
+	authFilePath := baseDir + "/gcloudSecrets.json"
+	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", authFilePath)
 
 	// Connect to database
 	uri, username, password := getDBConnectionParams()
