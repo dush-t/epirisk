@@ -4,8 +4,11 @@ FROM ubuntu:18.04 as builder
 
 # Setting up dependencies
 RUN apt-get update
-RUN printf "deb http://archive.debian.org/debian/ jessie main\ndeb-src http://archive.debian.org/debian/ jessie main\ndeb http://security.debian.org jessie/updates main\ndeb-src http://security.debian.org jessie/updates main" > /etc/apt/sources.list
-RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl pkg-config
+RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl
+
+RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz -o pkgconf
+RUN tar -zxf pkgconfig.tgz && cd pkg-config-0.29
+RUN ./configure && make install
  
 RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
