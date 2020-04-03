@@ -1,6 +1,6 @@
 # Using ubuntu as base because I need to setup some C dependencies
 # that I couldn't setup with the golang base.
-FROM ubuntu:latest as builder
+FROM ubuntu:18.04 as builder
 
 # Setting up dependencies
 RUN apt-get update
