@@ -4,8 +4,8 @@ FROM ubuntu:18.04 as builder
 
 # Setting up dependencies
 RUN apt-get update
-RUN apt-get install -y pkg-config
-RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl
+RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl gcc
+RUN apt-get install pkg-config
 
 # RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz | tar -v -C /usr/local -xz
 # RUN /usr/local/pkg-config-0.29/configure && make install
