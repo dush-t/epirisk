@@ -24,13 +24,14 @@ ENV PATH /go/bin:$PATH
 # Set current working directory inside the container
 WORKDIR /app
 
+# Installing pkg-config as it's needed to build the go project, probably due to some seabolt stuff.
+RUN apt-get install -y pkg-config
+
 # Download all dependencies. Doing this before the rest of the code so that dependencies
 # are cached by docker if there is no change in these two files, irrespective of changes in code
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Installing pkg-config as it's needed to build the go project, probably due to some seabolt stuff.
-RUN apt-get install -y pkg-config
 
 # Copying source code
 COPY . .
