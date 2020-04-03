@@ -2,12 +2,13 @@
 # that I couldn't setup with the golang base.
 FROM ubuntu:18.04 as builder
 
+RUN apt-get install -y pkg-config
 # Setting up dependencies
 RUN apt-get update
 RUN apt-get install -y libssl1.0.0 wget apt-utils lsb-release curl
 
-RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz | tar -v -C /usr/local -xz
-RUN /usr/local/pkg-config-0.29/configure && make install
+# RUN curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz | tar -v -C /usr/local -xz
+# RUN /usr/local/pkg-config-0.29/configure && make install
  
 RUN wget https://github.com/neo4j-drivers/seabolt/releases/download/v1.7.4/seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
 RUN dpkg -i seabolt-1.7.4-Linux-ubuntu-$(lsb_release -rs).deb
