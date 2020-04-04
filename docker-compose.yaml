@@ -15,5 +15,5 @@ services:
           - '7473:7473'
           - '7687:7687'
         volumes:
-          - /home/mr_dush__t/neo4j-data:/data/dbms
+          - /var/www/neo4j-data:/data/dbms
     
